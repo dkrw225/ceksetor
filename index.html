@@ -318,15 +318,15 @@ function cari() {
                 let labelName = columnLabels[i] || `Kolom ${i + 1}`;
                 let val = row[i] !== undefined && row[i] !== "" ? row[i] : "-";
 
-                // Format angka untuk kolom C, E-I (index 2, 4, 5, 6, 7, 8)
-                if ([2, 4, 5, 6, 7, 8].includes(i) && val !== "-") {
-                    let cleanVal = String(val).replace(/[^0-9.-]+/g, ""); // Bersihkan karakter non-angka
-                    let num = Number(cleanVal);
-                    if (!isNaN(num) && cleanVal !== "") {
-                        val = num.toLocaleString("id-ID");
-                    }
-                }
-
+// Format angka untuk kolom C, E-I (index 2, 4, 5, 6, 7, 8)
+if ([2, 4, 5, 6, 7, 8].includes(i) && val !== "-") {
+    // Hapus titik, spasi, atau karakter selain angka (menangani 100.000 maupun 100000)
+    let cleanVal = String(val).replace(/\./g, "").replace(/[^0-9.-]+/g, ""); 
+    let num = Number(cleanVal);
+    if (!isNaN(num) && cleanVal !== "") {
+        val = num.toLocaleString("id-ID");
+    }
+}
                 // Jika teks panjang, buat spanned full width
                 let isFull = String(val).length > 25;
                 let fieldClass = isFull ? "item-field full-width" : "item-field";
