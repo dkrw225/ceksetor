@@ -123,7 +123,6 @@ button:disabled {
     color: var(--text-muted);
 }
 
-/* Layout Kartu untuk Mode Portrait HP */
 .data-list {
     display: flex;
     flex-direction: column;
@@ -193,7 +192,11 @@ button:disabled {
     word-break: break-word;
 }
 
-/* State Message */
+.field-value a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
 .status-msg {
     text-align: center;
     padding: 30px 15px;
@@ -221,7 +224,6 @@ button:disabled {
         <input id="b1" type="text" placeholder="Masukkan kode kelas">
     </div>
 
-    
     <div class="date-row">
         <div class="form-group">
             <label for="g1">Dari Tanggal</label>
@@ -247,36 +249,33 @@ button:disabled {
 <script>
 const url = "https://script.google.com/macros/s/AKfycbz7K6uyzwvdGgKcVW0TD75i35dwdtJ4A4kA8a3RpeLL1OfLP_Yn7l06-ogaoe3sV9o6/exec";
   
-// Ubah nama label kolom di bawah ini sesuai judul header asli di Spreadsheet Anda
 const columnLabels = [
-    "Tanggal",  // Kolom A
+    "Tanggal",    // Kolom A
     "Nomor/Kode", // Kolom B
-    "Total",     // Kolom C
-    "Cash?",  // Kolom D
-    "IB",  // Kolom E
-    "DAD",  // Kolom F
-    "EXPO",  // Kolom G
-    "SEMANGKA",  // Kolom H
-    "SUMATRA",  // Kolom I
-    "Keterangan",  // Kolom J
-    "Bukti trf"// Kolom K
+    "Total",      // Kolom C
+    "Cash?",      // Kolom D
+    "IB",         // Kolom E
+    "DAD",        // Kolom F
+    "EXPO",       // Kolom G
+    "SEMANGKA",   // Kolom H
+    "SUMATRA",    // Kolom I
+    "Keterangan", // Kolom J
+    "Bukti trf"   // Kolom K
 ];
 
 function cari() {
-    let b = document.getElementById("b1").value;
+    let b = document.getElementById("b1").value.trim();
     let g = document.getElementById("g1").value;
     let h = document.getElementById("h1").value;
     let btn = document.getElementById("btnCari");
     let container = document.getElementById("hasilContainer");
     let countLabel = document.getElementById("resultCount");
 
-    // Status loading
     btn.innerText = "Memuat...";
     btn.disabled = true;
     container.innerHTML = `<div class="status-msg">Sedang mengambil data...</div>`;
     countLabel.innerText = "Hasil Pencarian";
 
-    // Kirim via GET parameter
     let queryUrl = `${url}?b1=${encodeURIComponent(b)}&g1=${encodeURIComponent(g)}&h1=${encodeURIComponent(h)}`;
 
     fetch(queryUrl)
@@ -297,7 +296,6 @@ function cari() {
 
         countLabel.innerText = `Menampilkan ${data.length} Data`;
 
-        // Render data dalam bentuk Kartu (Mobile Card Layout)
         data.forEach(row => {
             let card = document.createElement("div");
             card.className = "item-card";
@@ -313,28 +311,36 @@ function cari() {
                 <div class="item-grid">
             `;
 
-            // Render sisa kolom (Kolom C s/d K)
             for (let i = 2; i < row.length; i++) {
                 let labelName = columnLabels[i] || `Kolom ${i + 1}`;
-                let val = row[i] !== undefined && row[i] !== "" ? row[i] : "-";
+                let rawVal = row[i];
+                let displayVal = "-";
 
-// Format angka untuk kolom C, E-I (index 2, 4, 5, 6, 7, 8)
-if ([2, 4, 5, 6, 7, 8].includes(i) && val !== "-") {
-    // Hapus titik, spasi, atau karakter selain angka (menangani 100.000 maupun 100000)
-    let cleanVal = String(val).replace(/\./g, "").replace(/[^0-9.-]+/g, ""); 
-    let num = Number(cleanVal);
-    if (!isNaN(num) && cleanVal !== "") {
-        val = num.toLocaleString("id-ID");
-    }
-}
-                // Jika teks panjang, buat spanned full width
-                let isFull = String(val).length > 25;
+                if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== "") {
+                    displayVal = String(rawVal).trim();
+
+                    // Format angka untuk kolom C, E-I (index 2, 4, 5, 6, 7, 8)
+                    if ([2, 4, 5, 6, 7, 8].includes(i)) {
+                        let digitsOnly = displayVal.replace(/\D/g, ""); 
+                        if (digitsOnly !== "") {
+                            let num = parseInt(digitsOnly, 10);
+                            displayVal = num.toLocaleString("id-ID");
+                        }
+                    }
+
+                    // Format URL menjadi link aktif
+                    if (displayVal.startsWith("http://") || displayVal.startsWith("https://")) {
+                        displayVal = `<a href="${displayVal}" target="_blank" rel="noopener noreferrer">Lihat Lampiran ↗</a>`;
+                    }
+                }
+
+                let isFull = String(displayVal).length > 25 || displayVal.includes("<a ");
                 let fieldClass = isFull ? "item-field full-width" : "item-field";
 
                 htmlContent += `
                     <div class="${fieldClass}">
                         <span class="field-label">${labelName}</span>
-                        <span class="field-value">${val}</span>
+                        <span class="field-value">${displayVal}</span>
                     </div>
                 `;
             }
@@ -347,7 +353,6 @@ if ([2, 4, 5, 6, 7, 8].includes(i) && val !== "-") {
     .catch(err => {
         console.error(err);
         container.innerHTML = `<div class="status-msg error">Gagal memuat data dari server</div>`;
-        alert("Gagal mengambil data: " + err);
     })
     .finally(() => {
         btn.innerText = "Cari Data";
