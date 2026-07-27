@@ -1,0 +1,601 @@
+
+Conversation with Gemini
+Ubah index.html terlampir menjadi index.html yang bisa membaca appsscript.txt terlampir.
+
+Berikut adalah kode index.html yang telah disesuaikan agar cocok dengan logika dan parameter dari skrip Apps Script (appsscript.txt):
+
+Perubahan Utama yang Disesuaikan:
+Input Filter Kolom B (b1): Ditambahkan input baru untuk nomor/kata kunci yang memfilter Kolom B pada sheet sesuai parameter b1.  
+TXT
+
+11 Kolom Header (A s/d K): Tabel diperbarui memiliki 11 kolom header agar sesuai dengan data 11 kolom yang dikembalikan oleh Apps Script.  
+TXT
+
+Jumlah Kolom pada Pesan (colspan='11'): Menyesuaikan indikator Loading, Pesan Kosong, dan Gagal agar membentang seluas 11 kolom.
+
+Kode index.html Baru:
+HTML
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pencarian Data Setoran</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 15px;
+    background: #f5f5f5;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 5px #ccc;
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+}
+
+label:first-of-type {
+    margin-top: 0;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: #aaa;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 5px #ccc;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    background: #2196F3;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Pencarian Data Setoran</h2>
+
+    <label for="b1">Filter Kolom B (Nomor / Kata Kunci)</label>
+    <input id="b1" type="text" placeholder="Masukkan nomor / kata kunci...">
+
+    <label for="g1">Dari Tanggal</label>
+    <input id="g1" type="date">
+
+    <label for="h1">Sampai Tanggal</label>
+    <input id="h1" type="date">
+
+    <button id="btnCari" onclick="cari()">Cari Data</button>
+</div>
+
+<div class="table-container">
+    <table id="hasil">
+        <thead>
+            <tr>
+                <th>Kolom A (Tanggal)</th>
+                <th>Kolom B</th>
+                <th>Kolom C</th>
+                <th>Kolom D</th>
+                <th>Kolom E</th>
+                <th>Kolom F</th>
+                <th>Kolom G</th>
+                <th>Kolom H</th>
+                <th>Kolom I</th>
+                <th>Kolom J</th>
+                <th>Kolom K</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+// Pastikan URL di bawah ini mengarah ke URL Web App dari Apps Script milik Anda
+const url = "https://script.google.com/macros/s/AKfycbzq6af-uvGDFcEdZ5xK-0c3ZR_T4CIdeMwaYfoXFt0EZnP5mTlrhkb99-BDleBmMTou/exec";
+
+function cari() {
+    let b = document.getElementById("b1").value;
+    let g = document.getElementById("g1").value;
+    let h = document.getElementById("h1").value;
+    let btn = document.getElementById("btnCari");
+    let tbody = document.querySelector("#hasil tbody");
+
+    // Status loading
+    btn.innerText = "Memuat...";
+    btn.disabled = true;
+    tbody.innerHTML = "<tr><td colspan='11' style='text-align:center;'>Sedang mencari data...</td></tr>";
+
+    // Kirim via GET parameter sesuai variabel di Apps Script (b1, g1, h1)
+    let queryUrl = `${url}?b1=${encodeURIComponent(b)}&g1=${encodeURIComponent(g)}&h1=${encodeURIComponent(h)}`;
+
+    fetch(queryUrl)
+    .then(r => r.json())
+    .then(data => {
+        tbody.innerHTML = "";
+
+        // Pengecekan jika ada pesan error dari backend Apps Script
+        if (data.error) {
+            tbody.innerHTML = `<tr><td colspan='11' style='text-align:center; color:red;'>Error Backend: ${data.error}</td></tr>`;
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='11' style='text-align:center;'>Data tidak ditemukan</td></tr>";
+            return;
+        }
+
+        // Tampilkan data baris per baris (11 Kolom)
+        data.forEach(row => {
+            let tr = document.createElement("tr");
+            row.forEach(col => {
+                let td = document.createElement("td");
+                td.innerText = col;
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    })
+    .catch(err => {
+        console.error(err);
+        tbody.innerHTML = "<tr><td colspan='11' style='text-align:center; color:red;'>Gagal memuat data</td></tr>";
+        alert("Gagal mengambil data: " + err);
+    })
+    .finally(() => {
+        btn.innerText = "Cari Data";
+        btn.disabled = false;
+    });
+}
+</script>
+
+</body>
+</html>
+Sesuaikan agar nyaman dibaca di HP Android, mode potrait.
+
+File index.html telah disesuaikan agar sangat nyaman dan responsif di layar HP Android (Mode Portrait) 
+HTML icon
+index
+ HTML 
+Open
+.
+
+Optimasi Khusus Mode Portrait HP:
+Desain Berbasis Kartu (Card Layout): Mengganti tabel horizontal (yang biasanya memicu scroll samping yang terpotong di HP) menjadi daftar kartu seragam. Setiap baris data disajikan dalam 1 kartu vertikal yang rapi.
+
+Tata Letak Informasi Grid:
+
+Header kartu menampilkan Tanggal (Kolom A) dan Status/Nomor (Kolom B) secara menonjol.  
+TXT
+
+Isian data sisanya (Kolom C s/d K) disusun dalam grid 2 kolom yang ringkas dan mudah dibaca.  
+TXT
+
+Penyesuaian Form Input:
+
+Input tanggal diletakkan berdampingan (side-by-side) agar menghemat ruang vertikal.
+
+Ukuran tombol dan area sentuh (tap target) disesuaikan untuk kenyamanan ujung jari pengguna HP.
+
+Desain Responsif & Kustomisasi Label:
+
+Teks yang panjang akan otomatis mengambil lebar penuh kartu (full-width) agar tidak terpotong.
+
+Anda dapat menyesuaikan array columnLabels pada kode JavaScript untuk mengubah nama header (seperti "Nama", "Jumlah", "Keterangan") sesuai judul kolom asli Spreadsheet Anda.
+
+
+
+
+Gemini is AI and can make mistakes.
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pencarian Data Setoran</title>
+
+<style>
+:root {
+    --primary-color: #1976D2;
+    --primary-dark: #1565C0;
+    --bg-color: #F4F6F8;
+    --card-bg: #FFFFFF;
+    --text-main: #212121;
+    --text-muted: #666666;
+    --border-color: #E0E0E0;
+    --accent-blue: #E3F2FD;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 12px;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+}
+
+h2 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #FAFAFA;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+input:focus {
+    border-color: var(--primary-color);
+    background-color: #FFFFFF;
+}
+
+.date-row {
+    display: flex;
+    gap: 8px;
+}
+
+.date-row .form-group {
+    flex: 1;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+button:active {
+    background-color: var(--primary-dark);
+    transform: scale(0.98);
+}
+
+button:disabled {
+    background-color: #B0BEC5;
+    box-shadow: none;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 4px;
+}
+
+.result-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Layout Kartu untuk Mode Portrait HP */
+.data-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.item-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--primary-color);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.item-date {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.item-badge {
+    background: var(--accent-blue);
+    color: var(--primary-dark);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+
+.item-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-field.full-width {
+    grid-column: span 2;
+}
+
+.field-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.field-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-main);
+    word-break: break-word;
+}
+
+/* State Message */
+.status-msg {
+    text-align: center;
+    padding: 30px 15px;
+    background: white;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.status-msg.error {
+    color: #D32F2F;
+    background: #FFEBEE;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Pencarian Data Setoran</h2>
+
+    <div class="form-group">
+        <label for="b1">Filter Kolom B (Nomor / Kata Kunci)</label>
+        <input id="b1" type="text" placeholder="Masukkan nomor / kata kunci...">
+    </div>
+
+    <div class="date-row">
+        <div class="form-group">
+            <label for="g1">Dari Tanggal</label>
+            <input id="g1" type="date">
+        </div>
+        <div class="form-group">
+            <label for="h1">Sampai Tanggal</label>
+            <input id="h1" type="date">
+        </div>
+    </div>
+
+    <button id="btnCari" onclick="cari()">Cari Data</button>
+</div>
+
+<div class="result-header">
+    <span class="result-count" id="resultCount">Hasil Pencarian</span>
+</div>
+
+<div id="hasilContainer" class="data-list">
+    <div class="status-msg">Silakan isi filter di atas dan tekan <b>Cari Data</b></div>
+</div>
+
+<script>
+const url = "https://script.google.com/macros/s/AKfycbzq6af-uvGDFcEdZ5xK-0c3ZR_T4CIdeMwaYfoXFt0EZnP5mTlrhkb99-BDleBmMTou/exec";
+
+// Ubah nama label kolom di bawah ini sesuai judul header asli di Spreadsheet Anda
+const columnLabels = [
+    "Tanggal",  // Kolom A
+    "Nomor/Kode", // Kolom B
+    "Nama",     // Kolom C
+    "Kolom D",  // Kolom D
+    "Kolom E",  // Kolom E
+    "Kolom F",  // Kolom F
+    "Kolom G",  // Kolom G
+    "Kolom H",  // Kolom H
+    "Kolom I",  // Kolom I
+    "Kolom J",  // Kolom J
+    "Keterangan"// Kolom K
+];
+
+function cari() {
+    let b = document.getElementById("b1").value;
+    let g = document.getElementById("g1").value;
+    let h = document.getElementById("h1").value;
+    let btn = document.getElementById("btnCari");
+    let container = document.getElementById("hasilContainer");
+    let countLabel = document.getElementById("resultCount");
+
+    // Status loading
+    btn.innerText = "Memuat...";
+    btn.disabled = true;
+    container.innerHTML = `<div class="status-msg">Sedang mengambil data...</div>`;
+    countLabel.innerText = "Hasil Pencarian";
+
+    // Kirim via GET parameter
+    let queryUrl = `${url}?b1=${encodeURIComponent(b)}&g1=${encodeURIComponent(g)}&h1=${encodeURIComponent(h)}`;
+
+    fetch(queryUrl)
+    .then(r => r.json())
+    .then(data => {
+        container.innerHTML = "";
+
+        if (data.error) {
+            container.innerHTML = `<div class="status-msg error">Error Backend: ${data.error}</div>`;
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div class="status-msg">Data tidak ditemukan</div>`;
+            countLabel.innerText = "Data: 0";
+            return;
+        }
+
+        countLabel.innerText = `Menampilkan ${data.length} Data`;
+
+        // Render data dalam bentuk Kartu (Mobile Card Layout)
+        data.forEach(row => {
+            let card = document.createElement("div");
+            card.className = "item-card";
+
+            let tgl = row[0] || "-";
+            let colB = row[1] || "-";
+
+            let htmlContent = `
+                <div class="item-header">
+                    <span class="item-date">📅 ${tgl}</span>
+                    <span class="item-badge">${colB}</span>
+                </div>
+                <div class="item-grid">
+            `;
+
+            // Render sisa kolom (Kolom C s/d K)
+            for (let i = 2; i < row.length; i++) {
+                let labelName = columnLabels[i] || `Kolom ${i+1}`;
+                let val = row[i] !== undefined && row[i] !== "" ? row[i] : "-";
+                
+                // Jika teks panjang, buat spanned full width
+                let isFull = String(val).length > 25;
+                let fieldClass = isFull ? "item-field full-width" : "item-field";
+
+                htmlContent += `
+                    <div class="${fieldClass}">
+                        <span class="field-label">${labelName}</span>
+                        <span class="field-value">${val}</span>
+                    </div>
+                `;
+            }
+
+            htmlContent += `</div>`;
+            card.innerHTML = htmlContent;
+            container.appendChild(card);
+        });
+    })
+    .catch(err => {
+        console.error(err);
+        container.innerHTML = `<div class="status-msg error">Gagal memuat data dari server</div>`;
+        alert("Gagal mengambil data: " + err);
+    })
+    .finally(() => {
+        btn.innerText = "Cari Data";
+        btn.disabled = false;
+    });
+}
+</script>
+
+</body>
+</html>
+index.html
+Displaying index.html.
