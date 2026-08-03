@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Pencarian Data Setoran</title>
+<title>Pencarian & Input Data Setoran</title>
 
 <style>
 :root {
     --primary-color: #1976D2;
     --primary-dark: #1565C0;
+    --success-color: #2E7D32;
+    --success-dark: #1B5E20;
     --bg-color: #F4F6F8;
     --card-bg: #FFFFFF;
     --text-main: #212121;
@@ -47,6 +49,15 @@ h2 {
     text-align: center;
 }
 
+h3 {
+    margin: 0 0 12px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    border-bottom: 2px solid var(--accent-blue);
+    padding-bottom: 6px;
+}
+
 .form-group {
     margin-bottom: 12px;
 }
@@ -59,7 +70,11 @@ label {
     margin-bottom: 4px;
 }
 
-input {
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+textarea {
     width: 100%;
     padding: 10px 12px;
     font-size: 14px;
@@ -68,11 +83,54 @@ input {
     background-color: #FAFAFA;
     outline: none;
     transition: border-color 0.2s, background-color 0.2s;
+    font-family: inherit;
 }
 
-input:focus {
+input:focus, textarea:focus {
     border-color: var(--primary-color);
     background-color: #FFFFFF;
+}
+
+/* Radio Choice Style */
+.radio-group {
+    display: flex;
+    gap: 8px;
+}
+
+.radio-option {
+    flex: 1;
+    position: relative;
+}
+
+.radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-option label {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    background: #FAFAFA;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.radio-option input[type="radio"]:checked + label {
+    background-color: var(--accent-blue);
+    border-color: var(--primary-color);
+    color: var(--primary-dark);
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
 
 .date-row {
@@ -97,6 +155,15 @@ button {
     margin-top: 4px;
     box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
     transition: background-color 0.2s, transform 0.1s;
+}
+
+button.btn-success {
+    background-color: var(--success-color);
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.3);
+}
+
+button.btn-success:active {
+    background-color: var(--success-dark);
 }
 
 button:active {
@@ -199,7 +266,7 @@ button:disabled {
 
 .status-msg {
     text-align: center;
-    padding: 30px 15px;
+    padding: 20px 15px;
     background: white;
     border-radius: 10px;
     color: var(--text-muted);
@@ -217,7 +284,81 @@ button:disabled {
 <body>
 
 <div class="card">
-    <h2>Pencarian Data Setoran</h2>
+    <h2>Pencarian & Input Data Setoran</h2>
+
+    <!-- FORM INPUT DATA -->
+    <form id="formInput" onsubmit="simpanData(event)">
+        <h3>Input Data Setoran Baru</h3>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="inKelas">Kelas *</label>
+                <input id="inKelas" type="number" placeholder="Contoh: 32" required>
+            </div>
+            <div class="form-group">
+                <label for="inTotal">Total (Rp) *</label>
+                <input id="inTotal" type="text" class="rupiah-input" placeholder="0" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Metode Pembayaran</label>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="payCash" name="metode" value="Cash">
+                    <label for="payCash">Cash</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="payTransfer" name="metode" value="Transfer" checked>
+                    <label for="payTransfer">Transfer</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="inIB">IB</label>
+                <input id="inIB" type="text" class="rupiah-input" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="inDAD">DAD</label>
+                <input id="inDAD" type="text" class="rupiah-input" placeholder="0">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="inEXPO">EXPO</label>
+                <input id="inEXPO" type="text" class="rupiah-input" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="inSemangka">IDI / SEMANGKA</label>
+                <input id="inSemangka" type="text" class="rupiah-input" placeholder="0">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inSumatera">SUMATERA</label>
+            <input id="inSumatera" type="text" class="rupiah-input" placeholder="0">
+        </div>
+
+        <div class="form-group">
+            <label for="inKeterangan">Keterangan</label>
+            <textarea id="inKeterangan" rows="2" placeholder="Catatan tambahan..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="inBukti">Bukti Transfer (Gambar) *</label>
+            <input id="inBukti" type="file" accept="image/*" required>
+        </div>
+
+        <button type="submit" id="btnSimpan" class="btn-success">Simpan Data</button>
+    </form>
+</div>
+
+<!-- FORM PENCARIAN -->
+<div class="card">
+    <h3>Cari Data Setoran</h3>
 
     <div class="form-group">
         <label for="b1">Kode Kelas - Contoh: 32</label>
@@ -247,8 +388,120 @@ button:disabled {
 </div>
 
 <script>
-const url = "https://script.google.com/macros/s/AKfycbz7K6uyzwvdGgKcVW0TD75i35dwdtJ4A4kA8a3RpeLL1OfLP_Yn7l06-ogaoe3sV9o6/exec";
-  
+const url = "https://script.google.com/macros/s/AKfycby_TRjXP_-u6PZMcl-Bxr4kCw1fAQavFmNncPx2xOGsIIJXwffGZ4_TPKU_PnHa-3NR/exec";
+
+// Format otomatis nominal rupiah (pemisah titik)
+document.querySelectorAll('.rupiah-input').forEach(input => {
+    input.addEventListener('input', function(e) {
+        let value = this.value.replace(/\D/g, '');
+        if (value !== '') {
+            this.value = parseInt(value, 10).toLocaleString('id-ID');
+        } else {
+            this.value = '';
+        }
+    });
+});
+
+// Helper untuk membersihkan format titik rupiah ke Integer
+function parseRupiah(id) {
+    let val = document.getElementById(id).value.replace(/\D/g, '');
+    return val !== "" ? parseInt(val, 10) : 0;
+}
+
+// Konversi File Gambar ke Base64
+function convertFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            resolve("");
+            return;
+        }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// SIMPAN DATA SETORAN
+async function simpanData(event) {
+    event.preventDefault();
+
+    // 1. Ambil & Hitung Nilai Nominal
+    let total = parseRupiah("inTotal");
+    let ib = parseRupiah("inIB");
+    let dad = parseRupiah("inDAD");
+    let expo = parseRupiah("inEXPO");
+    let semangka = parseRupiah("inSemangka");
+    let sumatera = parseRupiah("inSumatera");
+
+    let subtotalRincian = ib + dad + expo + semangka + sumatera;
+
+    // 2. Validasi Jumlah Total Harus Sama Dengan Rincian
+    if (total !== subtotalRincian) {
+        alert(
+            `❌ JUMLAH NOMINAL TIDAK COCOK!\n\n` +
+            `• Total Diinput: Rp ${total.toLocaleString("id-ID")}\n` +
+            `• Penjumlahan (IB+DAD+EXPO+SEMANGKA+SUMATERA): Rp ${subtotalRincian.toLocaleString("id-ID")}\n\n` +
+            `Selisih: Rp ${Math.abs(total - subtotalRincian).toLocaleString("id-ID")}\n` +
+            `Mohon periksa kembali angka yang dimasukkan.`
+        );
+        return; // Hentikan proses simpan
+    }
+
+    let btn = document.getElementById("btnSimpan");
+    btn.innerText = "Menyimpan...";
+    btn.disabled = true;
+
+    try {
+        let fileInput = document.getElementById("inBukti").files[0];
+        let fileBase64 = await convertFileToBase64(fileInput);
+
+        let payload = {
+            timestamp: new Date().toLocaleString("id-ID"),
+            kelas: document.getElementById("inKelas").value,
+            total: total,
+            metode: document.querySelector('input[name="metode"]:checked').value,
+            ib: ib,
+            dad: dad,
+            expo: expo,
+            semangka: semangka,
+            sumatera: sumatera,
+            keterangan: document.getElementById("inKeterangan").value,
+            bukti: fileBase64,
+            fileName: fileInput ? fileInput.name : "",
+            fileType: fileInput ? fileInput.type : ""
+        };
+
+        let response = await fetch(url, {
+            method: "POST",
+            mode: "cors",
+            redirect: "follow",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        let resData = await response.json();
+
+        if (resData.result === "success" || resData.status === "success") {
+            alert("Data berhasil disimpan ke Spreadsheet!");
+            document.getElementById("formInput").reset();
+            // Kembalikan radio button ke default Cash
+            document.getElementById("payCash").checked = true;
+        } else {
+            alert("Gagal menyimpan data: " + (resData.message || "Terjadi kesalahan backend"));
+        }
+    } catch (err) {
+        console.error("Error Detail:", err);
+        alert("Terjadi kesalahan sistem saat mengirim data.");
+    } finally {
+        btn.innerText = "Simpan Data";
+        btn.disabled = false;
+    }
+}
+
+// PENCARIAN DATA SETORAN
 const columnLabels = [
     "Tanggal",    // Kolom A
     "Nomor/Kode", // Kolom B
@@ -319,7 +572,7 @@ function cari() {
                 if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== "") {
                     displayVal = String(rawVal).trim();
 
-                    // Format angka untuk kolom C, E-I (index 2, 4, 5, 6, 7, 8)
+                    // Format nominal angka (Rp)
                     if ([2, 4, 5, 6, 7, 8].includes(i)) {
                         let digitsOnly = displayVal.replace(/\D/g, ""); 
                         if (digitsOnly !== "") {
@@ -328,7 +581,7 @@ function cari() {
                         }
                     }
 
-                    // Format URL menjadi link aktif
+                    // Menjadikan URL sebagai Link Aktif
                     if (displayVal.startsWith("http://") || displayVal.startsWith("https://")) {
                         displayVal = `<a href="${displayVal}" target="_blank" rel="noopener noreferrer">Lihat Lampiran ↗</a>`;
                     }
