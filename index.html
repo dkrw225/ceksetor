@@ -390,10 +390,24 @@ button:disabled {
 <script>
 const url = "https://script.google.com/macros/s/AKfycbxk2FNeK_GB5kt9tYBNGLXzhqP3T84EjzczJHiPiLMEkXWcFx9_b_9SKyrucG96Cen1/exec";
 
+// Format tanggal ke format dd MMM yy (contoh: 05 Jan 24)
+function formatTanggalDDMMMYY(dateString) {
+    if (!dateString || dateString === "-") return "-";
+    let date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // kembalikan string asli jika parsing gagal
+    
+    const bulanIndo = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agust", "Sep", "Okt", "Nov", "Des"];
+    let day = String(date.getDate()).padStart(2, '0');
+    let month = bulanIndo[date.getMonth()];
+    let year = String(date.getFullYear()).slice(-2);
+    
+    return `${day} ${month} ${year}`;
+}
+
 // Format otomatis nominal rupiah (pemisah titik)
 document.querySelectorAll('.rupiah-input').forEach(input => {
     input.addEventListener('input', function(e) {
-        let value = this.value.replace(/\D/g, '');
+        let value = this.value.replace(/\\D/g, '');
         if (value !== '') {
             this.value = parseInt(value, 10).toLocaleString('id-ID');
         } else {
@@ -404,7 +418,7 @@ document.querySelectorAll('.rupiah-input').forEach(input => {
 
 // Helper untuk membersihkan format titik rupiah ke Integer
 function parseRupiah(id) {
-    let val = document.getElementById(id).value.replace(/\D/g, '');
+    let val = document.getElementById(id).value.replace(/\\D/g, '');
     return val !== "" ? parseInt(val, 10) : 0;
 }
 
@@ -439,10 +453,10 @@ async function simpanData(event) {
     // 2. Validasi Jumlah Total Harus Sama Dengan Rincian
     if (total !== subtotalRincian) {
         alert(
-            `❌ JUMLAH NOMINAL TIDAK COCOK!\n\n` +
-            `• Total Diinput: Rp ${total.toLocaleString("id-ID")}\n` +
-            `• Penjumlahan (IB+DAD+EXPO+SEMANGKA+SUMATERA): Rp ${subtotalRincian.toLocaleString("id-ID")}\n\n` +
-            `Selisih: Rp ${Math.abs(total - subtotalRincian).toLocaleString("id-ID")}\n` +
+            `❌ JUMLAH NOMINAL TIDAK COCOK!\\n\\n` +
+            `• Total Diinput: Rp ${total.toLocaleString("id-ID")}\\n` +
+            `• Penjumlahan (IB+DAD+EXPO+SEMANGKA+SUMATERA): Rp ${subtotalRincian.toLocaleString("id-ID")}\\n\\n` +
+            `Selisih: Rp ${Math.abs(total - subtotalRincian).toLocaleString("id-ID")}\\n` +
             `Mohon periksa kembali angka yang dimasukkan.`
         );
         return; // Hentikan proses simpan
@@ -577,9 +591,14 @@ function cari() {
                 if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== "") {
                     displayVal = String(rawVal).trim();
 
+                    // Format khusus Tanggal Setor (Index 11) ke dd MMM yy
+                    if (i === 11) {
+                        displayVal = formatTanggalDDMMMYY(displayVal);
+                    }
+
                     // Format nominal angka (Rp)
                     if ([2, 4, 5, 6, 7, 8].includes(i)) {
-                        let digitsOnly = displayVal.replace(/\D/g, ""); 
+                        let digitsOnly = displayVal.replace(/\\D/g, ""); 
                         if (digitsOnly !== "") {
                             let num = parseInt(digitsOnly, 10);
                             displayVal = num.toLocaleString("id-ID");
