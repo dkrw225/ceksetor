@@ -503,17 +503,19 @@ async function simpanData(event) {
 
 // PENCARIAN DATA SETORAN
 const columnLabels = [
-    "Tanggal",    // Kolom A
-    "Nomor/Kode", // Kolom B
-    "Total",      // Kolom C
-    "Cash?",      // Kolom D
-    "IB",         // Kolom E
-    "DAD",        // Kolom F
-    "EXPO",       // Kolom G
-    "SEMANGKA",   // Kolom H
-    "SUMATRA",    // Kolom I
-    "Keterangan", // Kolom J
-    "Bukti trf"   // Kolom K
+    "Tanggal",       // Kolom A (Index 0)
+    "Nomor/Kode",    // Kolom B (Index 1)
+    "Total",         // Kolom C (Index 2)
+    "Cash?",         // Kolom D (Index 3)
+    "IB",            // Kolom E (Index 4)
+    "DAD",           // Kolom F (Index 5)
+    "EXPO",          // Kolom G (Index 6)
+    "SEMANGKA",      // Kolom H (Index 7)
+    "SUMATRA",       // Kolom I (Index 8)
+    "Keterangan",    // Kolom J (Index 9)
+    "Bukti trf",     // Kolom K (Index 10)
+    "Tanggal Setor", // Kolom L / 12 (Index 11)
+    "Penyetor"       // Kolom M / 13 (Index 12)
 ];
 
 function cari() {
@@ -564,8 +566,11 @@ function cari() {
                 <div class="item-grid">
             `;
 
-            for (let i = 2; i < row.length; i++) {
-                let labelName = columnLabels[i] || `Kolom ${i + 1}`;
+            // Dibatasi hanya menampilkan hingga Kolom Penyetor (Index 12 / Kolom 13)
+            let maxColumns = Math.min(row.length, columnLabels.length);
+
+            for (let i = 2; i < maxColumns; i++) {
+                let labelName = columnLabels[i];
                 let rawVal = row[i];
                 let displayVal = "-";
 
