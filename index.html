@@ -407,9 +407,10 @@ function formatTanggalDDMMMYY(dateString) {
 // Format otomatis nominal rupiah (pemisah titik)
 document.querySelectorAll('.rupiah-input').forEach(input => {
     input.addEventListener('input', function(e) {
-        let value = this.value.replace(/\\D/g, '');
+        let value = this.value.replace(/\D/g, '');
+
         if (value !== '') {
-            this.value = parseInt(value, 10).toLocaleString('id-ID');
+            this.value = Number(value).toLocaleString('id-ID');
         } else {
             this.value = '';
         }
@@ -418,8 +419,13 @@ document.querySelectorAll('.rupiah-input').forEach(input => {
 
 // Helper untuk membersihkan format titik rupiah ke Integer
 function parseRupiah(id) {
-    let val = document.getElementById(id).value.replace(/\\D/g, '');
-    return val !== "" ? parseInt(val, 10) : 0;
+    let val = document.getElementById(id).value.replace(/\D/g, '');
+
+    if (val === "") {
+        return 0;
+    }
+
+    return Number(val);
 }
 
 // Konversi File Gambar ke Base64
