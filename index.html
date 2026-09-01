@@ -391,17 +391,59 @@ button:disabled {
 const url = "https://script.google.com/macros/s/AKfycbxk2FNeK_GB5kt9tYBNGLXzhqP3T84EjzczJHiPiLMEkXWcFx9_b_9SKyrucG96Cen1/exec";
 
 // Format tanggal ke format dd MMM yy (contoh: 05 Jan 24)
+
 function formatTanggalDDMMMYY(dateString) {
     if (!dateString || dateString === "-") return "-";
-    let date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString; // kembalikan string asli jika parsing gagal
-    
-    const bulanIndo = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agust", "Sep", "Okt", "Nov", "Des"];
-    let day = String(date.getDate()).padStart(2, '0');
-    let month = bulanIndo[date.getMonth()];
-    let year = String(date.getFullYear()).slice(-2);
-    
-    return `${day} ${month} ${year}`;
+
+    let str = String(dateString).trim();
+
+    // Format:
+    // 26/8/2026, 15.12.40
+    // 29/08/2026 15:00:24
+    let match = str.match(
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(\d{1,2})[.:](\d{2})[.:](\d{2}))?/
+    );
+
+    if (match) {
+        let day = parseInt(match[1], 10);
+        let month = parseInt(match[2], 10) - 1;
+        let year = parseInt(match[3], 10);
+
+        const bulanIndo = [
+            "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+            "Jul", "Agust", "Sep", "Okt", "Nov", "Des"
+        ];
+
+        // Validasi tanggal
+        let testDate = new Date(year, month, day);
+
+        if (
+            testDate.getFullYear() === year &&
+            testDate.getMonth() === month &&
+            testDate.getDate() === day
+        ) {
+            return `${String(day).padStart(2, "0")} ${bulanIndo[month]} ${String(year).slice(-2)}`;
+        }
+    }
+
+    // Fallback untuk format tanggal lain yang dikenali browser
+    let date = new Date(str);
+
+    if (!isNaN(date.getTime())) {
+        const bulanIndo = [
+            "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+            "Jul", "Agust", "Sep", "Okt", "Nov", "Des"
+        ];
+
+        let day = String(date.getDate()).padStart(2, "0");
+        let month = bulanIndo[date.getMonth()];
+        let year = String(date.getFullYear()).slice(-2);
+
+        return `${day} ${month} ${year}`;
+    }
+
+    // Jika tetap tidak bisa diparsing, tampilkan data asli
+    return str;
 }
 
 // Format otomatis nominal rupiah (pemisah titik)
@@ -477,7 +519,6 @@ async function simpanData(event) {
         let fileBase64 = await convertFileToBase64(fileInput);
 
         let payload = {
-            timestamp: new Date().toLocaleString("id-ID"),
             kelas: document.getElementById("inKelas").value,
             total: total,
             metode: document.querySelector('input[name="metode"]:checked').value,
@@ -604,7 +645,7 @@ function cari() {
 
                     // Format nominal angka (Rp)
                     if ([2, 4, 5, 6, 7, 8].includes(i)) {
-                        let digitsOnly = displayVal.replace(/\\D/g, ""); 
+                        let digitsOnly = displayVal.replace(/\D/g, ""); 
                         if (digitsOnly !== "") {
                             let num = parseInt(digitsOnly, 10);
                             displayVal = num.toLocaleString("id-ID");
