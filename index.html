@@ -348,8 +348,8 @@ button:disabled {
         </div>
 
         <div class="form-group">
-            <label for="inBukti">Bukti Transfer (Gambar) *</label>
-            <input id="inBukti" type="file" accept="image/*" required>
+            <label for="inBukti">Bukti Transfer (Gambar)</label>
+            <input id="inBukti" type="file" accept="image/*">
         </div>
 
         <button type="submit" id="btnSimpan" class="btn-success">Simpan Data</button>
@@ -483,6 +483,24 @@ function convertFileToBase64(file) {
         reader.onerror = error => reject(error);
     });
 }
+
+// ==========================================
+// BUKTI TRANSFER WAJIB JIKA TRANSFER
+// ==========================================
+
+const payCash = document.getElementById("payCash");
+const payTransfer = document.getElementById("payTransfer");
+const inBukti = document.getElementById("inBukti");
+
+function updateBuktiRequirement() {
+    inBukti.required = payTransfer.checked;
+}
+
+payCash.addEventListener("change", updateBuktiRequirement);
+payTransfer.addEventListener("change", updateBuktiRequirement);
+
+updateBuktiRequirement();
+
 
 // SIMPAN DATA SETORAN
 async function simpanData(event) {
